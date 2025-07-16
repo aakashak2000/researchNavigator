@@ -80,13 +80,11 @@ class BasicRAG:
         
         similar_docs = self.vector_store.similarity_search(query, k=k)
         return similar_docs
-    
+  
     def answer_question(self, question, k = 3):
         if self.vector_store is None:
             raise ValueError("Vector Store is not initialised. Call create_vector_store first")
         
-        print(f"Question: {question}")
-
         relevant_docs = self.search_similar(question, k)    
         context = "\n\n".join(doc.page_content for doc in relevant_docs)
 

@@ -36,7 +36,7 @@ class ArxivDownloader:
         for result in client.results(search):
             paper_info = PaperInfo(
                 title = result.title,
-                authors = [name for name in result.authors],
+                authors = [author.name for author in result.authors],
                 abstract = result.summary,
                 arxiv_id = result.entry_id.split('/')[-1],
                 url = result.entry_id,
