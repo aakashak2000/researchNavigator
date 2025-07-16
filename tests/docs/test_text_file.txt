@@ -1,1 +1,0 @@
-Machine learning is a subset of artificial intelligence. Deep learning uses neural networks. Natural language processing helps computers understand text. Computer vision enables image recognition. Reinforcement learning trains agents through rewards.
