@@ -1,5 +1,5 @@
 import sys
-sys.append('../.')
+sys.path.append('../.')
 from src.rag.basic_rag import BasicRAG
 
 

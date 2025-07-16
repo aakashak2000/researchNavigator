@@ -48,3 +48,60 @@ class ArxivDownloader:
 
         print(f"Found {len(papers)} papers")
         return papers   
+    
+    def download_pdf(self, paper):
+        safe_title = "".join(c for c in paper.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+        safe_title = safe_title[:50]
+        filename = f"{paper.arxiv_id}_{safe_title}.pdf"
+        file_path = os.path.join(self.download_dir, filename)
+
+        if os.path.exists(file_path):
+            print(f"Paper already exists!")
+            paper.file_path = file_path
+            return file_path
+        
+        try:
+            response = requests.get(paper.pdf_url, stream=True)
+            response.raise_for_status()
+
+
+            with open(file_path, 'wb') as f:
+                total_size = int(response.headers.get('content-length', 0))
+                downloaded = 0
+                
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total_size > 0:
+                            progress = (downloaded / total_size) * 100
+                            print(f"Progress: {progress:.1f}%", flush = True)
+
+                print()
+
+            paper.file_path = file_path
+            print(f"Successfully downloaded: {file_path}")
+            return file_path
+        
+        except requests.RequestException as e:
+            print(f"Failed to download {paper.title}: {e}")
+            return None
+        
+    def search_and_download(self, query, max_results=10):
+        
+        papers = self.search_papers(query, max_results)
+        downloaded_papers = []
+        for i, paper in enumerate(papers, 1):
+            print(f"\n[{i}/{len(papers)}] Processing: {paper.title[:60]}...")
+            
+            if i > 1:
+                time.sleep(1)
+
+            file_path = self.download_pdf(paper)
+            if file_path:
+                downloaded_papers.append(paper)
+            else:
+                print(f"Skipping paper due to download failure")
+
+        print(f"\n=== Download Complete: {len(downloaded_papers)}/{len(papers)} papers ===")
+        return downloaded_papers
