@@ -1,122 +1,123 @@
 # **README.md - Agentic Research Navigator**
 
-```markdown
-# Research Navigator
+> **A modern AI-powered document analysis system that learns and evolves**
 
-A Retrieval-Augmented Generation (RAG) system built to explore modern AI development practices through hands-on implementation.
+Research Navigator transforms how you interact with documents by combining Retrieval-Augmented Generation (RAG) with cutting-edge AI technologies. Built from the ground up to demonstrate best practices in AI development.
 
-## Project Overview
+---
 
-Research Navigator is a document-based question-answering system that demonstrates RAG architecture patterns. This repository documents both the implementation and the learning journey involved in building production-ready AI applications.
+## What It Does
 
-## Current Status
+**Ask questions about your documents and get intelligent answers.**
 
-**Version**: 0.1.0-dev  
-**Phase**: Project initialization and baseline setup
+Upload PDFs, Word documents, or text files, and Research Navigator will:
+- Understand your document content at a deep level
+- Answer complex questions with precise citations
+- Provide context-aware responses based on your specific documents
+- Learn and improve with each interaction
 
-The project follows a sequential development approach where each phase introduces new concepts while building upon previous implementations. Each version represents a complete, working system with incremental improvements.
+---
 
-## Technology Stack
+## Built With Modern AI Stack
 
-- **Framework**: LangChain, LangGraph
-- **Local AI**: Ollama, sentence-transformers
-- **Vector Database**: ChromaDB
-- **Development**: Python 3.11+, Pydantic, pytest
-- **Interface**: Streamlit
+**Local-First Architecture**
+- **LangChain & LangGraph** - AI workflow orchestration
+- **Ollama** - Local language models (privacy-focused)
+- **ChromaDB** - Intelligent vector storage
+- **Sentence Transformers** - Advanced document understanding
+
+**Developer-Friendly**
+- **Python 3.11+** with full type safety
+- **Pydantic** for robust data validation
+- **Streamlit** for interactive demonstrations
+- **Comprehensive testing** with pytest
+
+---
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.11+
-- macOS (M4 optimized)
+### System Requirements
+- **macOS** (M4 optimized) or Linux
+- **Python 3.11+**
+- **4GB+ RAM** recommended
 
 ### Installation
 
 ```bash
+# Clone and setup
 git clone https://github.com/yourusername/research-navigator.git
 cd research-navigator
 
+# Create environment
 python -m venv venv
 source venv/bin/activate
 
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Setup Local AI
-
+### Run Local AI
 ```bash
-# Install Ollama if not already installed
+# Install Ollama (one-time setup)
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Pull a model
+# Download AI model
 ollama pull llama3.2
 ```
 
-## Project Structure
-
-```
-research-navigator/
-├── src/core/           # Document processing, embeddings, vector storage
-├── src/rag/            # RAG implementation
-├── src/models/         # Pydantic data models
-├── tests/              # Unit tests
-├── notebooks/          # Experimentation and development
-├── streamlit_app/      # Demo interface
-└── data/               # Documents and vector database
-```
-
-## Development Approach
-
-This project emphasizes learning through implementation. Each development cycle focuses on a single feature, ensuring deep understanding of the underlying concepts before moving to the next component.
-
-The codebase prioritizes:
-- Type safety with Pydantic models
-- Comprehensive testing
-- Clear documentation
-- Modular architecture
-
-## Contributing
-
-This is primarily a learning project. The development process and architectural decisions are documented in commit messages and code comments to serve as a reference for similar implementations.
-
-## License
-
-MIT License
+### Launch Demo
+```bash
+streamlit run streamlit_app/app.py
 ```
 
 ---
 
-## **Key Features of This README**
+## Project Architecture
 
-### **Professional Standards**
-- Clean, structured format
-- Industry-standard sections
-- Technical but accessible language
-- No promotional language or emojis
+```
+research-navigator/
+├── src/core/          # Document processing & AI components
+├── src/rag/           # Question-answering engine
+├── src/models/        # Data structures & validation
+├── tests/             # Comprehensive test suite
+├── streamlit_app/     # Interactive demo interface
+└── data/              # Your documents & AI knowledge base
+```
 
-### **Beginner-Friendly Elements**
-- Clear project purpose
-- Simple installation steps
-- Technology stack explanation
-- Basic project structure
+---
 
-### **Expert-Friendly Elements**
-- Technical stack details
-- Architecture hints
-- Development philosophy
-- Professional terminology
+## Learning Journey
 
-### **Evolution-Ready**
-- Version tracking
-- Current status section
-- Modular structure explanation
-- Easy to expand sections
+This project documents the complete process of building a production-ready AI system. Each version introduces new capabilities while maintaining clean, understandable code.
 
-### **Short and Focused**
-- Essential information only
-- No future promises
-- Current state focused
-- Clean formatting
+**Current Focus**: Establishing robust RAG foundations with local AI infrastructure.
 
-This README can grow naturally as you implement features. Each phase will add new sections while maintaining the professional, educational tone you're aiming for.
+**Development Philosophy**: Learn by building real solutions, one feature at a time.
+
+---
+
+## Why Research Navigator?
+
+**Privacy First**: Your documents never leave your machine  
+**Performance**: Optimized for Apple Silicon and modern hardware  
+**Educational**: Clean code that teaches AI development patterns  
+**Practical**: Solves real document analysis problems  
+
+---
+
+## Development Status
+
+**Version**: `0.1.0-dev`  
+**Phase**: Foundation & Core RAG Implementation
+
+The system follows incremental development where each phase delivers a complete, working solution before adding complexity.
+
+---
+
+## License
+
+MIT License - Build upon this project freely
+
+---
+
+**Ready to explore intelligent document analysis?** Follow the Quick Start guide above or dive into the code to see how modern AI systems are built.
