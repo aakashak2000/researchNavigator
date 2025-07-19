@@ -8,13 +8,16 @@ from langchain_core.documents import Document
 from langchain.chains import RetrievalQA
 from langchain_ollama import OllamaLLM
 
-from src.rag.query_expander import QueryExpander
-
+from rank_bm25 import BM25Okapi
 from typing import List
+
 import numpy as np
 import chromadb
 import os
 import re
+
+from src.rag.query_expander import QueryExpander
+
 
 class BasicRAG:
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
@@ -35,6 +38,8 @@ class BasicRAG:
             )
         
         self.vector_store: VectorStore = None
+        self.bm25_index = None
+        self.bm25_doc_mapping = {}
         self.llm = OllamaLLM(
             model = "llama3.1:8b",
             temperature=0.1)
@@ -185,6 +190,57 @@ class BasicRAG:
         ranked_chunks = [chunk for score, chunk in sorted(scored_chunks, key = lambda x: x[0], reverse=True)]
         return ranked_chunks
 
+    def _create_bm25_index(self, chunks):
+        texts = []
+        self.bm25_doc_mapping = {}
+
+        for i, chunk in enumerate(chunks):
+            text_content = chunk.page_content
+            texts.append(text_content)
+            self.bm25_doc_mapping[i] = chunk
+
+        tokenized_docs = [doc.split() for doc in texts]
+        self.bm25_index = BM25Okapi(tokenized_docs)
+
+    def _bm25_search(self, query, k=5):
+        if not hasattr(self, 'bm25_index') or self.bm25_index is None:
+            raise ValueError('BM25 index not created.Call create_vector_store first.')
+        
+        query_tokens = query.split()
+        bm25_scores = self.bm25_index.get_scores(query_tokens)
+
+        top_k_indices = bm25_scores.argsort()[-k:][::-1]
+
+        top_documents = [self.bm25_doc_mapping[i] for i in top_k_indices]
+
+        return top_documents
+    
+    def _semantic_search(self, query, k=5):
+        if self.vector_store is None:
+            raise ValueError("Vector Store is not initialised. Call create_vector_store first.")
+        
+        similar_docs = self.vector_store.similarity_search(query, k)
+        return similar_docs
+    
+    def _hybrid_search(self, query, k=5, search_multiplier = 2):
+        semantic_results = self._semantic_search(query, k=k*search_multiplier)
+        bm25_results = self._bm25_search(query, k=k*search_multiplier)
+
+        combined_results = []
+
+        max_len = max(len(semantic_results), len(bm25_results))
+
+        for i in range(max_len):
+            if i < len(semantic_results):
+                combined_results.append(semantic_results[i])
+            if i < len(bm25_results) and bm25_results[i] not in combined_results:
+                combined_results.append(bm25_results[i])
+
+            if len(combined_results) >= k:
+                break
+
+        return combined_results[:k]
+    
     def create_vector_store(self, chunks, collection_name="documents"):
         
         self.vector_store = Chroma.from_documents(
@@ -194,22 +250,30 @@ class BasicRAG:
             persist_directory='./chromadb'
         )
 
+        self._create_bm25_index(chunks)
+
         return self.vector_store
     
-    def search_similar(self, query, k = 5):
+    def search_similar(self, query, k = 5, search_type='hybrid'):
         if self.vector_store is None:
             raise ValueError(f"Vector Store not initialised. Call create_vector_store first")
-    
-        similar_docs = self.vector_store.similarity_search(query, k=k)
-        return similar_docs
+        
+        if search_type == 'semantic':
+            return self._semantic_search(query, k)
+        elif search_type == 'bm25':
+            return self._bm25_search(query, k)
+        elif search_type == 'hybrid':
+            return self._hybrid_search(query, k)
+        else:
+            raise ValueError(f"Unknown Search Type: {search_type}. Use 'semantic', 'bm25', or 'hybrid")
   
-    def answer_question(self, question, k = 3):
+    def answer_question(self, question, k = 3, search_type = 'hybrid'):
         if self.vector_store is None:
             raise ValueError("Vector Store is not initialised. Call create_vector_store first")
         
         expanded_question = self.query_expander.expand_query(question)
         
-        relevant_docs = self.search_similar(expanded_question, k * 3)    
+        relevant_docs = self.search_similar(expanded_question, k * 3, search_type)    
         unique_docs = self.deduplicate_chunks(relevant_docs)[:k]
         reranked_docs = self.rerank_chunks(question, unique_docs)
 
