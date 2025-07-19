@@ -17,13 +17,13 @@ import os
 import re
 
 from src.rag.query_expander import QueryExpander
-
+from src.rag.context_optimizer import ContextOptimizer
 
 class BasicRAG:
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200, llm = None):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-    
+        self.context_opt = ContextOptimizer()
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size = chunk_size,
             chunk_overlap = chunk_overlap,
@@ -274,8 +274,9 @@ class BasicRAG:
         relevant_docs = self.search_similar(expanded_question, k * 3, search_type)    
         unique_docs = self.deduplicate_chunks(relevant_docs)[:k]
         reranked_docs = self.rerank_chunks(question, unique_docs)
+        optimized_docs = self.context_opt.optimize_chunks_for_context(reranked_docs, question, self.prompt_template.template)
 
-        context = "\n\n".join(doc.page_content for doc in reranked_docs)
+        context = "\n\n".join(doc.page_content for doc in optimized_docs)
 
         prompt = self.prompt_template.format(context=context, question=question)
         answer = self.llm.invoke(prompt)
