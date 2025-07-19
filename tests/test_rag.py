@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../.')
+sys.path.append('../')
 from src.rag.basic_rag import BasicRAG
 
 
@@ -8,7 +8,7 @@ rag = BasicRAG()
 docs = rag.load_documents(file_path)
 chunks = rag.split_documents(docs)
 vector_store = rag.create_vector_store(chunks, "test")
-answer = rag.answer_question("What is deep learning?")
+answer = rag.answer_question("Research transformer attention mechanisms")
 print('\n=== FINAL ANSWER ===')
 print(answer)
 

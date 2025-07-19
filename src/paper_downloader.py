@@ -6,6 +6,8 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
+from src.rag.query_expander import QueryExpander
+
 @dataclass
 class PaperInfo:
     title: str
@@ -22,8 +24,10 @@ class ArxivDownloader:
     def __init__(self, download_dir = './papers'):
         self.download_dir = download_dir
         os.makedirs(download_dir, exist_ok=True)
+        self.query_expander = QueryExpander()
 
     def search_papers(self, query, max_results = 10):
+        print(f"{query=}")
         client = arxiv.Client()
         search = arxiv.Search(
             query = query,
@@ -88,8 +92,10 @@ class ArxivDownloader:
             return None
         
     def search_and_download(self, query, max_results=10):
+
+        expanded_query = self.query_expander.expand_query(query)
         
-        papers = self.search_papers(query, max_results)
+        papers = self.search_papers(expanded_query, max_results)
         downloaded_papers = []
         for i, paper in enumerate(papers, 1):
             print(f"\n[{i}/{len(papers)}] Processing: {paper.title[:60]}...")

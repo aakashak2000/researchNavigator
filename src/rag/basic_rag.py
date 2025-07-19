@@ -66,11 +66,16 @@ class BasicRAG:
     
     def deduplicate_chunks(self, chunks, similarity_threshold = 0.85):
 
+        if not chunks:
+            return chunks
+        
         unique_chunks = [chunks[0]]
         
-        for chunk in chunks[1:]:
+        for i, chunk in enumerate(chunks[1:], 1):
             is_duplicate = False
-            for uc in unique_chunks:
+            max_similarity = 0.0
+
+            for j, uc in enumerate(unique_chunks):
                 
                 score = self._cosine_similarity(
                     self.embeddings.embed_query(chunk.page_content),
@@ -83,7 +88,7 @@ class BasicRAG:
 
             if not is_duplicate:
                 unique_chunks.append(chunk)
-            
+
         return unique_chunks
 
     
