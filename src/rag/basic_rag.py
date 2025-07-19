@@ -20,11 +20,10 @@ from src.rag.query_expander import QueryExpander
 
 
 class BasicRAG:
-    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
+    def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200, llm = None):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.query_expander = QueryExpander()
-
+    
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size = chunk_size,
             chunk_overlap = chunk_overlap,
@@ -40,9 +39,8 @@ class BasicRAG:
         self.vector_store: VectorStore = None
         self.bm25_index = None
         self.bm25_doc_mapping = {}
-        self.llm = OllamaLLM(
-            model = "llama3.1:8b",
-            temperature=0.1)
+        self.llm = llm
+        self.query_expander = QueryExpander(self.llm)
         self.prompt_template = PromptTemplate(
                 input_variables=["context", "question"],
                 template="""Use the following context to answer the question. If you cannot answer based on the context, say so.

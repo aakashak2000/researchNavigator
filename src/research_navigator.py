@@ -1,5 +1,6 @@
 import os
 
+from langchain_ollama import OllamaLLM
 from datetime import datetime, timedelta
 
 from typing import List, Dict
@@ -10,10 +11,12 @@ from src.paper_downloader import ArxivDownloader, PaperInfo
 class ResearchNavigator:
     def __init__(self, config=None):
         self.config = config or Config()
-        self.downloader = ArxivDownloader(download_dir='./papers')
+        self.llm = OllamaLLM(model='llama3.1:8b', temperature=0.1)
+        self.downloader = ArxivDownloader(download_dir='./papers', llm = self.llm)
         self.rag = BasicRAG(
             chunk_size = self.config.chunk_size if hasattr(self.config, 'chunk_size') else 1000,
-            chunk_overlap = 200
+            chunk_overlap = 200,
+            llm = self.llm
         )
         self.processed_topics = {}
 
@@ -70,7 +73,6 @@ class ResearchNavigator:
             return True
 
         if query not in self.processed_topics:
-            print(f"==========New Topic: Needs Processing==========")
             return True
         
         last_processed = self.processed_topics[query]

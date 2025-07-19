@@ -6,6 +6,8 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
+from langchain_ollama import OllamaLLM
+
 from src.rag.query_expander import QueryExpander
 
 @dataclass
@@ -21,10 +23,13 @@ class PaperInfo:
     filepath: Optional[str] = None
 
 class ArxivDownloader:
-    def __init__(self, download_dir = './papers'):
+    def __init__(self, download_dir = './papers', llm = None):
         self.download_dir = download_dir
         os.makedirs(download_dir, exist_ok=True)
-        self.query_expander = QueryExpander()
+        if llm:
+            self.query_expander = QueryExpander(llm)
+        else:
+            self.query_expander = None
 
     def search_papers(self, query, max_results = 10):
         print(f"{query=}")
@@ -93,7 +98,10 @@ class ArxivDownloader:
         
     def search_and_download(self, query, max_results=10):
 
-        expanded_query = self.query_expander.expand_query(query)
+        if self.query_expander:
+            expanded_query = self.query_expander.expand_query(query)
+        else:
+            expanded_query = query
         
         papers = self.search_papers(expanded_query, max_results)
         downloaded_papers = []
